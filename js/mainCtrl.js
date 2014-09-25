@@ -11,9 +11,11 @@ app.controller('mainCtrl', function($scope, itunesService){
       columnDefs: [
         {field: 'Play', displayName: 'Play', width: '40px', cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()"><a href="{{row.getProperty(col.field)}}"><img src="http://www.icty.org/x/image/Miscellaneous/play_icon30x30.png"></a></div>'},
         {field: 'Artist', displayName: 'Artist'},
+        {field: 'Song', displayName: 'Song'},
         {field: 'Collection', displayName: 'Collection'},
         {field: 'AlbumArt', displayName: 'Album Art', width: '110px', cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()"><img src="{{row.getProperty(col.field)}}"></div>'},
         {field: 'Type', displayName: 'Type'},
+        {field: 'SinglePrice', displayName: 'Single Price'},
         {field: 'CollectionPrice', displayName: 'Collection Price'},
       ]
   };
@@ -22,19 +24,22 @@ app.controller('mainCtrl', function($scope, itunesService){
 
   //First inject itunesService into your controller.
 
-    //code here
-
+  $scope.filterOptions = {
+    filterText: ''
+  }
 
   //Now write a function that will call the method on the itunesService that is responsible for getting the data from iTunes, whenever the user clicks the submit button
   //*remember, that method should be expecting an artist name. The artist name is coming from the input box on index.html, head over there and check if that input box is tied to any specific model we could use.
   //Also note that that method should be retuning a promise, so you could use .then in this function.
     
-    //Code here
+  $scope.getSongData = function() {
+    itunesService.getArtist($scope.artist)
+    .then(function(data) {
+      $scope.songData = songSorter(data);
+    });
+  }
 
-
-  //Check that the above method is working by entering a name into the input field on your web app, and then console.log the result
-
-    //Code here
+  //Check that the above method is working by entering a name into the input field on your web app, and then console.log the resul    //Code here
 
 
   //If everything worked you should see a huge array of objects inside your console. That's great! But unfortunately that's not what ng-grid is expecting. What you need to do now
@@ -49,12 +54,27 @@ app.controller('mainCtrl', function($scope, itunesService){
   */
   //the iTunes API is going to give you a lot more details than ng-grid wants. Create a new array and then loop through the iTunes data pushing into your new array objects that look like the above data.
 
-    //Code here
-
+ var songSorter = function(data) {
+    var songData = [];
+    var newSongObject = {};
+    for (var i = 0; i < data.length; i++) {
+        newSongObject = {
+        AlbumArt: data[i].artworkUrl60 || '',
+        Artist: data[i].artistName || '',
+        Song: data[i].trackName || '',
+        Collection: data[i].collectionName || '',
+        SinglePrice: data[i].trackPrice || '',
+        CollectionPrice: data[i].collectionPrice || '',
+        Play: data[i].previewURL || '',
+        Type: data[i].kind || ''
+        };
+        songData.push(newSongObject);
+      }
+      return songData;
+    }
 
   //Once you have that final data array, you simply need to put it on the scope (or more specifically on the scope as songData). Once you do this ($scope.songData = myFinalArray) then ng-grid will see that and populate the page.
 
-    //Code here
 });
 
 
